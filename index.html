@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FX Entry Checklist</title>
+<title>FX Checklist</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FX Checklist">
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#687386;--line:#e3e7ef;--accent:#315efb;--good:#168a5b;--bad:#d14343;--shadow:0 10px 30px rgba(20,30,55,.08)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif}
@@ -126,6 +133,7 @@ function saveSettings(){
 function closeSettings(){document.getElementById("modalBg").classList.remove("open")}
 document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeSettings()});
 render();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}))}
 </script>
 </body>
 </html>
