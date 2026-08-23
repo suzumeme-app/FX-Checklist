@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FX Entry Checklist</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#687386;--line:#e3e7ef;--accent:#315efb;--good:#168a5b;--bad:#d14343;--shadow:0 10px 30px rgba(20,30,55,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif}
+.app{max-width:820px;margin:0 auto;padding:28px 18px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.title{font-size:24px;font-weight:800}.sub{font-size:13px;color:var(--muted);margin-top:4px}
+button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer}.secondary{background:#edf1f7;color:#33405a}.primary{background:var(--accent);color:#fff}
+.score-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}.score-row{display:flex;align-items:end;justify-content:space-between;gap:15px}.score{font-size:40px;font-weight:850;line-height:1}.score small{font-size:18px;color:var(--muted);font-weight:600}.status{font-weight:800;font-size:16px}.good{color:var(--good)}.bad{color:var(--bad)}
+.bar{height:10px;background:#edf0f5;border-radius:99px;overflow:hidden;margin-top:18px}.bar>div{height:100%;background:var(--accent);border-radius:99px;transition:.2s;width:0}
+.meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:14px}.meta strong{color:var(--text)}
+.section{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.section-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.section-head h2{font-size:16px;margin:0}.items{padding:8px 14px}.item{display:flex;align-items:center;gap:13px;padding:15px 6px;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.check{width:22px;height:22px;accent-color:var(--accent);flex:0 0 auto}.label{flex:1;min-width:0}.label-text{font-size:15px;line-height:1.45}.points{font-weight:800;font-size:14px;white-space:nowrap}.empty{padding:35px 20px;text-align:center;color:var(--muted)}
+.heading{padding:16px 6px 8px;font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.02em}.heading:first-child{padding-top:6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--line)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,18,35,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal-bg.open{display:flex}.modal{background:#fff;width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid #ccd3df;border-radius:10px;outline:none}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:#fff}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:82px}.icon{background:#f1f3f7;color:#536078;padding:9px 11px}.drag-handle{cursor:grab;color:#a7afc0;font-size:16px;padding:9px 4px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:#f5f7fb;border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+@media(max-width:560px){.app{padding:18px 12px 35px}.top{align-items:flex-start}.top button{padding:8px 10px}.score{font-size:34px}.item{gap:10px}.label-text{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div><div class="title">FX Entry Checklist</div><div class="sub">条件が揃っているかを点数で確認</div></div>
+    <button class="secondary" onclick="openSettings()">⚙ 設定</button>
+  </div>
+
+  <div class="score-card">
+    <div class="score-row">
+      <div><div class="score"><span id="score">0</span><small> / <span id="max">0</span>点</small></div></div>
+      <div id="status" class="status bad">条件不足</div>
+    </div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="meta"><span>合格ライン <strong id="threshold">0</strong>点</span><span>残り <strong id="remaining">0</strong>点</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>エントリー条件</h2><span id="count" class="sub"></span></div>
+    <div id="items" class="items"></div>
+    <div class="actions"><button class="secondary" onclick="clearChecks()">✓ 全て解除</button><button class="primary" onclick="openSettings()">項目を編集</button></div>
+  </div>
+</div>
+
+<div id="modalBg" class="modal-bg">
+  <div class="modal">
+    <h2>チェック項目を編集</h2>
+    <div class="field"><label>合格ライン</label><input id="thresholdInput" type="number" min="0" step="1"><div class="hint">この点数以上で「条件を満たしています」と判定します。</div></div>
+    <div class="field"><label>項目</label><div id="editItems"></div><div style="display:flex;gap:8px"><button class="secondary" onclick="addEditItem()">＋ 項目を追加</button><button class="secondary" onclick="addEditHeading()">＋ ジャンルを追加</button></div></div>
+    <div class="modal-actions"><button class="secondary" onclick="closeSettings()">キャンセル</button><button class="primary" onclick="saveSettings()">保存</button></div>
+  </div>
+</div>
+
+<script>
+const KEY="fxEntryChecklist_v1";
+const defaultData={threshold:7,items:[{text:"上位足の方向と一致している",points:2,checked:false},{text:"重要なサポート・レジスタンスが確認できる",points:2,checked:false},{text:"経済指標の影響がない",points:1,checked:false},{text:"トレンドが発生している",points:1,checked:false},{text:"エントリー根拠が明確",points:2,checked:false},{text:"損切り位置が適切",points:2,checked:false}]};
+let data=load();
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.items))return x}catch(e){}return structuredClone(defaultData)}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function render(){
+ const box=document.getElementById("items");box.innerHTML="";
+ data.items.forEach((it,i)=>{
+  if(it.type==="heading"){
+   const h=document.createElement("div");h.className="heading";h.textContent=it.text;box.appendChild(h);return
+  }
+  const row=document.createElement("label");row.className="item";row.innerHTML=`<input class="check" type="checkbox" ${it.checked?"checked":""} onchange="toggle(${i})"><div class="label"><div class="label-text"></div></div><div class="points">＋${it.points}点</div>`;row.querySelector(".label-text").textContent=it.text;box.appendChild(row)
+ });
+ const realItems=data.items.filter(x=>x.type!=="heading");
+ document.getElementById("count").textContent=realItems.length+"項目";
+ const score=realItems.reduce((s,x)=>s+(x.checked?Number(x.points):0),0),max=realItems.reduce((s,x)=>s+Number(x.points),0),threshold=Math.max(0,Number(data.threshold)||0);
+ document.getElementById("score").textContent=score;document.getElementById("max").textContent=max;document.getElementById("threshold").textContent=threshold;document.getElementById("remaining").textContent=Math.max(0,threshold-score);
+ const ok=score>=threshold;const st=document.getElementById("status");st.textContent=ok?"条件を満たしています":"条件不足";st.className="status "+(ok?"good":"bad");const barEl=document.getElementById("bar");barEl.style.width=(max?Math.min(100,score/max*100):0)+"%";barEl.style.background=ok?"var(--good)":"var(--bad)";
+}
+function toggle(i){data.items[i].checked=!data.items[i].checked;save();render()}
+function clearChecks(){data.items.forEach(x=>x.checked=false);save();render()}
+function openSettings(){
+ document.getElementById("thresholdInput").value=data.threshold;const wrap=document.getElementById("editItems");wrap.innerHTML="";
+ data.items.forEach((it)=>{if(it.type==="heading")addEditHeading(it);else addEditItem(it)});
+ document.getElementById("modalBg").classList.add("open")
+}
+function attachDrag(row,wrap){
+ row.draggable=true;
+ row.addEventListener("dragstart",e=>{dragRow=row;row.classList.add("dragging");e.dataTransfer.effectAllowed="move"});
+ row.addEventListener("dragend",()=>{row.classList.remove("dragging");clearDragOver()});
+ row.addEventListener("dragover",e=>{
+  e.preventDefault();if(!dragRow||dragRow===row)return;
+  clearDragOver();
+  const before=e.clientY<row.getBoundingClientRect().top+row.offsetHeight/2;
+  row.classList.add(before?"drag-over-top":"drag-over-bottom")
+ });
+ row.addEventListener("drop",e=>{
+  e.preventDefault();if(!dragRow||dragRow===row)return;
+  const before=e.clientY<row.getBoundingClientRect().top+row.offsetHeight/2;
+  wrap.insertBefore(dragRow,before?row:row.nextSibling);
+  clearDragOver();dragRow=null
+ });
+}
+function addEditItem(it={text:"新しい条件",points:1,checked:false}){
+ const wrap=document.getElementById("editItems"),row=document.createElement("div");row.className="edit-row";row.dataset.kind="item";
+ row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text"><input class="epoints" type="number" min="1" max="2" step="1"><button class="icon" type="button">削除</button>`;
+ row.querySelector(".etext").value=it.text;row.querySelector(".epoints").value=it.points;
+ row.querySelector("button").onclick=()=>row.remove();
+ attachDrag(row,wrap);wrap.appendChild(row)
+}
+function addEditHeading(it={text:"新しいジャンル"}){
+ const wrap=document.getElementById("editItems"),row=document.createElement("div");row.className="edit-row heading-row";row.dataset.kind="heading";
+ row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text" placeholder="ジャンル名"><button class="icon" type="button">削除</button>`;
+ row.querySelector(".etext").value=it.text;
+ row.querySelector("button").onclick=()=>row.remove();
+ attachDrag(row,wrap);wrap.appendChild(row)
+}
+let dragRow=null;
+function clearDragOver(){document.querySelectorAll(".edit-row").forEach(r=>r.classList.remove("drag-over-top","drag-over-bottom"))}
+function saveSettings(){
+ const rows=[...document.querySelectorAll(".edit-row")],items=[];
+ rows.forEach((r)=>{
+  const text=r.querySelector(".etext").value.trim();if(!text)return;
+  if(r.dataset.kind==="heading"){items.push({type:"heading",text});return}
+  const points=Math.min(2,Math.max(1,Number(r.querySelector(".epoints").value)||1));
+  items.push({text,points,checked:false})
+ });
+ const old=data.items.filter(x=>x.type!=="heading");
+ items.forEach(x=>{if(x.type==="heading")return;const same=old.find(o=>o.text===x.text);if(same)x.checked=same.checked});
+ data={threshold:Math.max(0,Number(document.getElementById("thresholdInput").value)||0),items};save();closeSettings();render()
+}
+function closeSettings(){document.getElementById("modalBg").classList.remove("open")}
+document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeSettings()});
+render();
+</script>
+</body>
+</html>
