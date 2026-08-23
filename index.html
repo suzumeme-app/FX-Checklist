@@ -22,7 +22,9 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:14px}.meta strong{color:var(--text)}
 .section{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.section-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.section-head h2{font-size:16px;margin:0}.items{padding:8px 14px}.item{display:flex;align-items:center;gap:13px;padding:15px 6px;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.check{width:22px;height:22px;accent-color:var(--accent);flex:0 0 auto}.label{flex:1;min-width:0}.label-text{font-size:15px;line-height:1.45}.points{font-weight:800;font-size:14px;white-space:nowrap}.empty{padding:35px 20px;text-align:center;color:var(--muted)}
 .heading{padding:16px 6px 8px;font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.02em}.heading:first-child{padding-top:6px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--line)}.actions button{display:flex;align-items:center;gap:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--line)}.actions button{display:flex;align-items:center;gap:8px;transition:background .2s}
+#copyBtn.copied{background:var(--good)}
+#copyBtn{width:150px;justify-content:center;flex:0 0 auto}
 .menu-wrap{position:relative}.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:170px;padding:6px;display:none;z-index:20}.menu.open{display:block}.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;padding:10px 12px;border-radius:8px;font-size:14px;color:var(--text)}.menu button:hover{background:var(--hover-bg)}.menu-icon{width:18px;height:18px;flex:0 0 auto;color:currentColor}
 .modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:82px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 4px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
 @media(max-width:560px){.app{padding:18px 12px 35px}.top{align-items:flex-start}.top button{padding:8px 10px}.score{font-size:34px}.item{gap:10px}.label-text{font-size:14px}}
@@ -58,7 +60,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
     <div id="items" class="items"></div>
     <div class="actions">
       <button class="secondary" onclick="clearChecks()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>リセット</button>
-      <button class="primary" onclick="copyResult()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>結果をコピー</button>
+      <button id="copyBtn" class="primary" onclick="copyResult()"><svg id="copyIcon" class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span id="copyLabel">結果をコピー</span></button>
     </div>
   </div>
 </div>
@@ -131,10 +133,23 @@ function copyResult(){
  flush();
  const text=lines.join("\n");
  if(navigator.clipboard&&navigator.clipboard.writeText){
-  navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text))
+  navigator.clipboard.writeText(text).then(showCopyFeedback).catch(()=>{fallbackCopy(text);showCopyFeedback()})
  }else{
-  fallbackCopy(text)
+  fallbackCopy(text);showCopyFeedback()
  }
+}
+let copyFeedbackTimer=null;
+function showCopyFeedback(){
+ const icon=document.getElementById("copyIcon"),label=document.getElementById("copyLabel"),btn=document.getElementById("copyBtn");
+ if(copyFeedbackTimer)clearTimeout(copyFeedbackTimer);
+ icon.innerHTML='<path d="M20 6L9 17l-5-5"/>';
+ label.textContent="コピー完了";
+ btn.classList.add("copied");
+ copyFeedbackTimer=setTimeout(()=>{
+  icon.innerHTML='<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>';
+  label.textContent="結果をコピー";
+  btn.classList.remove("copied")
+ },1500)
 }
 function fallbackCopy(text){
  const ta=document.createElement("textarea");
