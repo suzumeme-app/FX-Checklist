@@ -50,7 +50,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
       <button class="secondary" onclick="toggleMenu()" style="display:flex;align-items:center;gap:8px"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</button>
       <div id="settingsMenu" class="menu">
         <button onclick="openSettings()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z"/><path d="M13 7l4 4"/></svg>項目を編集</button>
-        <button onclick="downloadData()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 8l4-4 4 4"/><rect x="5" y="15" width="14" height="5" rx="2"/></svg>保存</button>
+        <button onclick="downloadDataMenu()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 8l4-4 4 4"/><rect x="5" y="15" width="14" height="5" rx="2"/></svg>保存</button>
         <button onclick="triggerImport()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><rect x="5" y="15" width="14" height="5" rx="2"/></svg>インポート</button>
         <button onclick="toggleTheme()"><svg id="themeIcon" class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg><span id="themeLabel">ダークモード</span></button>
       </div>
@@ -76,6 +76,17 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
       <button class="secondary" onclick="clearChecks()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>リセット</button>
       <button id="copyBtn" class="primary" onclick="copyResult()"><svg id="copyIcon" class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span id="copyLabel">結果をコピー</span></button>
     </div>
+  </div>
+</div>
+
+<div id="saveModalBg" class="modal-bg">
+  <div class="modal" style="width:min(360px,100%)">
+    <h2>保存範囲を選択</h2>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('current')">表示中のタブを保存</button>
+      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('all')">すべてのタブを保存</button>
+    </div>
+    <div class="modal-actions"><button class="secondary" onclick="closeSaveModal()">キャンセル</button></div>
   </div>
 </div>
 
@@ -317,13 +328,21 @@ document.addEventListener("click",e=>{
  const wrap=document.querySelector(".menu-wrap");
  if(wrap&&!wrap.contains(e.target))closeMenu()
 });
-function downloadData(){
+function downloadDataMenu(){
  closeMenu();
- const blob=new Blob([JSON.stringify(store,null,2)],{type:"application/json"});
+ document.getElementById("saveModalBg").classList.add("open")
+}
+function closeSaveModal(){document.getElementById("saveModalBg").classList.remove("open")}
+document.getElementById("saveModalBg").addEventListener("click",e=>{if(e.target.id==="saveModalBg")closeSaveModal()});
+function downloadData(scope){
+ closeSaveModal();
+ const payload=scope==="current"?data:store;
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
  const ts=new Date().toISOString().slice(0,10);
- a.href=url;a.download=`fx-checklist-${ts}.json`;
+ const namePart=scope==="current"?(data.name||"list").replace(/[\\/:*?"<>|]/g,""):"all";
+ a.href=url;a.download=`fx-checklist-${namePart}-${ts}.json`;
  document.body.appendChild(a);a.click();a.remove();
  URL.revokeObjectURL(url)
 }
@@ -335,19 +354,21 @@ function importData(event){
   try{
    const parsed=JSON.parse(reader.result);
    if(parsed&&Array.isArray(parsed.lists)&&parsed.lists.length){
+    if(!confirm("これは全リストのバックアップファイルです。現在のすべてのリストを置き換えて読み込みますか？"))throw new Error("cancelled");
     store=parsed;
     if(!store.activeId||!store.lists.find(l=>l.id===store.activeId))store.activeId=store.lists[0].id;
    }else if(parsed&&Array.isArray(parsed.items)){
-    // 旧形式（単一リスト）のインポートは新しいリストとして追加
-    const id=makeId();
-    store.lists.push({id,name:"インポート",threshold:parsed.threshold||0,items:parsed.items});
-    store.activeId=id;
+    // 単一リスト形式のインポートは、現在表示中のリストの中身を上書き
+    data.threshold=parsed.threshold||0;
+    data.items=parsed.items;
+    if(parsed.name)data.name=parsed.name;
+    if(parsed.color)data.color=parsed.color;
    }else{
     throw new Error("invalid")
    }
    data=activeList();save();render()
   }catch(e){
-   alert("読み込みに失敗しました。正しいファイルか確認してください。")
+   if(e.message!=="cancelled")alert("読み込みに失敗しました。正しいファイルか確認してください。")
   }
   event.target.value=""
  };
