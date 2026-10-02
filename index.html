@@ -290,6 +290,7 @@ function copyFromList(id){
  wrap.innerHTML="";
  src.items.forEach(it=>{if(it.type==="heading")addEditHeading({text:it.text});else addEditItem({text:it.text,points:it.points,checked:false})});
  document.getElementById("thresholdInput").value=src.threshold;
+ renderColorPalette(src.color||TAB_COLORS[0]);
  sel.value="";toggleCopySelect(false)
 }
 function attachDrag(row,wrap){
