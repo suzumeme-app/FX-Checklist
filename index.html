@@ -340,9 +340,10 @@ function downloadData(scope){
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
- const ts=new Date().toISOString().slice(0,10);
- const namePart=scope==="current"?(data.name||"list").replace(/[\\/:*?"<>|]/g,""):"all";
- a.href=url;a.download=`fx-checklist-${namePart}-${ts}.json`;
+ const d=new Date();
+ const ts=`${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,"0")}分`;
+ const namePart=scope==="current"?(data.name||"無題").replace(/[\\/:*?"<>|]/g,""):"すべて";
+ a.href=url;a.download=`FXチェックリスト(${namePart}) ${ts}.json`;
  document.body.appendChild(a);a.click();a.remove();
  URL.revokeObjectURL(url)
 }
