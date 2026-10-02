@@ -45,6 +45,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .tabbar.reordering{padding-top:8px;margin-top:-8px;padding-bottom:10px;margin-bottom:8px}
 .tab.lifted{position:relative;z-index:5;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.35);cursor:grabbing}
 .tab.shifting{transition:transform .15s}
+.th-row{display:flex;align-items:center;gap:12px}.th-row input{flex:1;min-width:0}.th-count{white-space:nowrap;font-size:14px;font-weight:700;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -68,7 +69,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
   <div class="score-card">
     <div class="score-row">
       <div><div class="score"><span id="score">0</span><small> / <span id="max">0</span>点</small></div></div>
-      <div id="status" class="status bad">条件不足</div>
+      <div id="status" class="status bad">未達成</div>
     </div>
     <div class="bar"><div id="bar"></div></div>
     <div class="meta"><span>合格ライン <strong id="threshold">0</strong>点</span><span>残り <strong id="remaining">0</strong>点</span></div>
@@ -88,8 +89,8 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
   <div class="modal" style="width:min(360px,100%)">
     <h2>保存範囲を選択</h2>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('current')">表示中のタブを保存</button>
-      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('all')">すべてのタブを保存</button>
+      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('current')">表示中のリストを保存</button>
+      <button class="secondary" style="justify-content:center;padding:14px" onclick="downloadData('all')">すべてのリストを保存</button>
     </div>
     <div class="modal-actions"><button class="secondary" onclick="closeSaveModal()">キャンセル</button></div>
   </div>
@@ -101,7 +102,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
     <div id="copyRow" class="field" style="display:none"><select id="copyListSelect" class="list-name-input" onchange="copyFromList(this.value)"></select></div>
     <div class="field"><label>リスト名</label><input id="listNameInput" type="text" class="list-name-input"></div>
     <div class="field"><label>タブの色</label><div id="colorPalette" class="color-palette"></div></div>
-    <div class="field"><label>合格ライン</label><input id="thresholdInput" type="number" min="0" step="1"><div class="hint">この点数以上で「条件を満たしています」と判定します。</div></div>
+    <div class="field"><label>合格ライン</label><div class="th-row"><input id="thresholdInput" type="number" min="0" step="1"><span id="itemCountHint" class="th-count"></span></div><div class="hint">この点数以上で「達成」と判定します。</div></div>
     <div class="field"><label>項目</label><div id="editItems"></div><div style="display:flex;gap:8px"><button class="secondary" onclick="addEditItem()">＋ 項目を追加</button><button class="secondary" onclick="addEditHeading()">＋ ジャンルを追加</button></div></div>
     <button id="deleteListBtn" class="delete-list-btn" onclick="deleteCurrentList()">このリストを削除</button>
     <div class="modal-actions"><button class="secondary" onclick="closeSettings()">キャンセル</button><button class="primary" onclick="saveSettings()">保存</button></div>
@@ -166,7 +167,7 @@ function render(){
  document.getElementById("count").textContent=realItems.length+"項目";
  const score=realItems.reduce((s,x)=>s+(x.checked?Number(x.points):0),0),max=realItems.reduce((s,x)=>s+Number(x.points),0),threshold=Math.max(0,Number(data.threshold)||0);
  document.getElementById("score").textContent=score;document.getElementById("max").textContent=max;document.getElementById("threshold").textContent=threshold;document.getElementById("remaining").textContent=Math.max(0,threshold-score);
- const ok=score>=threshold;const st=document.getElementById("status");st.textContent=ok?"条件を満たしています":"条件不足";st.className="status "+(ok?"good":"bad");const barEl=document.getElementById("bar");barEl.style.width=(max?Math.min(100,score/max*100):0)+"%";barEl.style.background=ok?"var(--good)":"var(--bad)";
+ const ok=score>=threshold;const st=document.getElementById("status");st.textContent=ok?"達成":"未達成";st.className="status "+(ok?"good":"bad");const barEl=document.getElementById("bar");barEl.style.width=(max?Math.min(100,score/max*100):0)+"%";barEl.style.background=ok?"var(--good)":"var(--bad)";
 }
 function toggle(i){data.items[i].checked=!data.items[i].checked;save();render()}
 function renderTabs(){
@@ -417,6 +418,11 @@ function saveSettings(){
 }
 function closeSettings(){document.getElementById("modalBg").classList.remove("open")}
 document.getElementById("modalBg").addEventListener("click",e=>{if(e.target.id==="modalBg")closeSettings()});
+function updateItemCount(){
+ const n=[...document.querySelectorAll("#editItems .edit-row:not(.heading-row)")].filter(r=>r.querySelector(".etext").value.trim()).length;
+ document.getElementById("itemCountHint").textContent=`/ ${n} 項目中`
+}
+{const ei=document.getElementById("editItems");new MutationObserver(updateItemCount).observe(ei,{childList:true});ei.addEventListener("input",updateItemCount)}
 function toggleMenu(){document.getElementById("settingsMenu").classList.toggle("open")}
 function closeMenu(){document.getElementById("settingsMenu").classList.remove("open")}
 document.addEventListener("click",e=>{
