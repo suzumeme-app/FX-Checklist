@@ -26,7 +26,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 #copyBtn.copied{background:var(--good)}
 #copyBtn{width:150px;justify-content:center;flex:0 0 auto;background:var(--list-accent)}
 .menu-wrap{position:relative}.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:170px;padding:6px;display:none;z-index:20}.menu.open{display:block}.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;padding:10px 12px;border-radius:8px;font-size:14px;color:var(--text)}.menu button:hover{background:var(--hover-bg)}.menu-icon{width:18px;height:18px;flex:0 0 auto;color:currentColor}
-.modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:82px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 4px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:56px;padding-left:8px;padding-right:4px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 4px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
 @media(max-width:560px){.app{padding:18px 12px 35px}.top{align-items:flex-start}.top button{padding:8px 10px}.score{font-size:34px}.item{gap:10px}.label-text{font-size:14px}}
 .tabbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
 .tabbar::-webkit-scrollbar{height:4px}
@@ -132,6 +132,8 @@ function load(){
  return{lists:[{id,name:"デフォルト",threshold:7,items:defaultItems()}],activeId:id}
 }
 let store=load();
+function forceOnePoint(){store.lists.forEach(l=>l.items.forEach(it=>{if(it.type!=="heading")it.points=1}))}
+forceOnePoint();
 function save(){localStorage.setItem(KEY,JSON.stringify(store))}
 function activeList(){return store.lists.find(l=>l.id===store.activeId)||store.lists[0]}
 let data=activeList();
@@ -384,8 +386,8 @@ function attachDrag(row,wrap){
 }
 function addEditItem(it={text:"新しい条件",points:1,checked:false}){
  const wrap=document.getElementById("editItems"),row=document.createElement("div");row.className="edit-row";row.dataset.kind="item";
- row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text"><input class="epoints" type="number" min="1" max="2" step="1"><button class="icon" type="button">削除</button>`;
- row.querySelector(".etext").value=it.text;row.querySelector(".epoints").value=it.points;
+ row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text"><button class="icon" type="button">削除</button>`;
+ row.querySelector(".etext").value=it.text;
  row.querySelector("button").onclick=()=>row.remove();
  attachDrag(row,wrap);wrap.appendChild(row)
 }
@@ -403,8 +405,7 @@ function saveSettings(){
  rows.forEach((r)=>{
   const text=r.querySelector(".etext").value.trim();if(!text)return;
   if(r.dataset.kind==="heading"){items.push({type:"heading",text});return}
-  const points=Math.min(2,Math.max(1,Number(r.querySelector(".epoints").value)||1));
-  items.push({text,points,checked:false})
+  items.push({text,points:1,checked:false})
  });
  const old=data.items.filter(x=>x.type!=="heading");
  items.forEach(x=>{if(x.type==="heading")return;const same=old.find(o=>o.text===x.text);if(same)x.checked=same.checked});
@@ -461,7 +462,7 @@ function importData(event){
    }else{
     throw new Error("invalid")
    }
-   data=activeList();save();render()
+   forceOnePoint();data=activeList();save();render()
   }catch(e){
    if(e.message!=="cancelled")alert("読み込みに失敗しました。正しいファイルか確認してください。")
   }
