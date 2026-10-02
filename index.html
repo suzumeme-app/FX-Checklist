@@ -26,7 +26,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 #copyBtn.copied{background:var(--good)}
 #copyBtn{width:150px;justify-content:center;flex:0 0 auto;background:var(--list-accent)}
 .menu-wrap{position:relative}.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:170px;padding:6px;display:none;z-index:20}.menu.open{display:block}.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;padding:10px 12px;border-radius:8px;font-size:14px;color:var(--text)}.menu button:hover{background:var(--hover-bg)}.menu-icon{width:18px;height:18px;flex:0 0 auto;color:currentColor}
-.modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:56px;padding-left:8px;padding-right:4px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 4px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:56px;padding-left:8px;padding-right:4px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 8px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
 @media(max-width:560px){.app{padding:18px 12px 35px}.top{align-items:flex-start}.top button{padding:8px 10px}.score{font-size:34px}.item{gap:10px}.label-text{font-size:14px}}
 .tabbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
 .tabbar::-webkit-scrollbar{height:4px}
@@ -46,6 +46,8 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .tab.lifted{position:relative;z-index:5;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.35);cursor:grabbing}
 .tab.shifting{transition:transform .15s}
 .th-row{display:flex;align-items:center;gap:12px}.th-row input{flex:1;min-width:0}.th-count{white-space:nowrap;font-size:14px;font-weight:700;color:var(--muted)}
+.edit-row.lifted{position:relative;z-index:5;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.35);border-radius:10px}
+.edit-row.shifting{transition:transform .15s}
 </style>
 </head>
 <body>
@@ -369,21 +371,56 @@ function copyFromList(id){
  sel.value="";toggleCopySelect(false)
 }
 function attachDrag(row,wrap){
- row.draggable=true;
- row.addEventListener("dragstart",e=>{dragRow=row;row.classList.add("dragging");e.dataTransfer.effectAllowed="move"});
- row.addEventListener("dragend",()=>{row.classList.remove("dragging");clearDragOver()});
- row.addEventListener("dragover",e=>{
-  e.preventDefault();if(!dragRow||dragRow===row)return;
-  clearDragOver();
-  const before=e.clientY<row.getBoundingClientRect().top+row.offsetHeight/2;
-  row.classList.add(before?"drag-over-top":"drag-over-bottom")
- });
- row.addEventListener("drop",e=>{
-  e.preventDefault();if(!dragRow||dragRow===row)return;
-  const before=e.clientY<row.getBoundingClientRect().top+row.offsetHeight/2;
-  wrap.insertBefore(dragRow,before?row:row.nextSibling);
-  clearDragOver();dragRow=null
- });
+ const handle=row.querySelector(".drag-handle");
+ handle.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  e.preventDefault();
+  const modal=document.querySelector(".modal"),pid=e.pointerId,sy=e.clientY;
+  const rows=[...wrap.querySelectorAll(".edit-row")],from=rows.indexOf(row);
+  const mr=modal.getBoundingClientRect(),startScroll=modal.scrollTop;
+  const tops=rows.map(r=>r.getBoundingClientRect().top-mr.top+modal.scrollTop),heights=rows.map(r=>r.offsetHeight);
+  const shift=heights[from]+9;
+  let cy=sy,to=from,raf=0,active=true;
+  rows.forEach(r=>r.classList.add(r===row?"lifted":"shifting"));
+  if(navigator.vibrate)navigator.vibrate(10);
+  try{handle.setPointerCapture(pid)}catch(_){}
+  const apply=()=>{
+   const dy=(cy-sy)+(modal.scrollTop-startScroll);
+   row.style.transform=`translateY(${dy}px) scale(1.02)`;
+   const center=tops[from]+heights[from]/2+dy;
+   to=0;
+   rows.forEach((r,k)=>{if(k!==from&&tops[k]+heights[k]/2<center)to++});
+   rows.forEach((r,k)=>{
+    if(k===from)return;
+    let m=0;
+    if(from<to&&k>from&&k<=to)m=-shift;
+    else if(from>to&&k>=to&&k<from)m=shift;
+    r.style.transform=m?`translateY(${m}px)`:""
+   })
+  };
+  const loop=()=>{
+   if(!active)return;
+   const r=modal.getBoundingClientRect();
+   if(cy<r.top+50)modal.scrollTop-=10;else if(cy>r.bottom-50)modal.scrollTop+=10;
+   apply();raf=requestAnimationFrame(loop)
+  };
+  const end=commit=>{
+   if(!active)return;
+   active=false;cancelAnimationFrame(raf);
+   handle.removeEventListener("pointermove",onMove);
+   handle.removeEventListener("pointerup",onUp);
+   handle.removeEventListener("pointercancel",onCancel);
+   rows.forEach(r=>{r.classList.remove("lifted","shifting");r.style.transform=""});
+   if(commit&&to!==from)wrap.insertBefore(row,to>from?rows[to].nextSibling:rows[to])
+  };
+  const onMove=ev=>{if(ev.pointerId===pid)cy=ev.clientY};
+  const onUp=ev=>{if(ev.pointerId===pid)end(true)};
+  const onCancel=ev=>{if(ev.pointerId===pid)end(false)};
+  handle.addEventListener("pointermove",onMove);
+  handle.addEventListener("pointerup",onUp);
+  handle.addEventListener("pointercancel",onCancel);
+  loop()
+ })
 }
 function addEditItem(it={text:"新しい条件",points:1,checked:false}){
  const wrap=document.getElementById("editItems"),row=document.createElement("div");row.className="edit-row";row.dataset.kind="item";
