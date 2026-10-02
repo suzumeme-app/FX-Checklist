@@ -40,6 +40,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .color-swatch.selected{border-color:var(--text)}
 .color-swatch svg{width:16px;height:16px;color:#fff;display:none}
 .color-swatch.selected svg{display:block}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.modal-head h2{margin:0}
 </style>
 </head>
 <body>
@@ -92,7 +93,8 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 
 <div id="modalBg" class="modal-bg">
   <div class="modal">
-    <h2>チェック項目を編集</h2>
+    <div class="modal-head"><h2>チェック項目を編集</h2><button id="copyListBtn" class="secondary" type="button" style="padding:7px 12px;font-size:13px;white-space:nowrap" onclick="toggleCopySelect()">既存リストを複製</button></div>
+    <div id="copyRow" class="field" style="display:none"><select id="copyListSelect" class="list-name-input" onchange="copyFromList(this.value)"></select></div>
     <div class="field"><label>リスト名</label><input id="listNameInput" type="text" class="list-name-input"></div>
     <div class="field"><label>タブの色</label><div id="colorPalette" class="color-palette"></div></div>
     <div class="field"><label>合格ライン</label><input id="thresholdInput" type="number" min="0" step="1"><div class="hint">この点数以上で「条件を満たしています」と判定します。</div></div>
@@ -186,7 +188,7 @@ function addList(){
  const id=makeId();
  const n=store.lists.length+1;
  const color=TAB_COLORS[store.lists.length%TAB_COLORS.length];
- store.lists.push({id,name:"新しいリスト"+(n>1?n:""),threshold:7,items:defaultItems(),color});
+ store.lists.push({id,name:"新しいリスト"+(n>1?n:""),threshold:7,items:[],color});
  store.activeId=id;save();data=activeList();render();
  openSettings()
 }
@@ -269,7 +271,26 @@ function openSettings(){
  renderColorPalette(data.color||TAB_COLORS[0]);
  document.getElementById("thresholdInput").value=data.threshold;const wrap=document.getElementById("editItems");wrap.innerHTML="";
  data.items.forEach((it)=>{if(it.type==="heading")addEditHeading(it);else addEditItem(it)});
+ const others=store.lists.filter(l=>l.id!==data.id),sel=document.getElementById("copyListSelect");
+ sel.innerHTML='<option value="">複製元のリストを選択…</option>';
+ others.forEach(l=>{const o=document.createElement("option");o.value=l.id;o.textContent=l.name||"無題";sel.appendChild(o)});
+ document.getElementById("copyListBtn").style.display=others.length?"":"none";
+ toggleCopySelect(false);
  document.getElementById("modalBg").classList.add("open")
+}
+function toggleCopySelect(force){
+ const row=document.getElementById("copyRow");
+ row.style.display=(force===undefined?row.style.display==="none":force)?"block":"none"
+}
+function copyFromList(id){
+ const src=store.lists.find(l=>l.id===id),sel=document.getElementById("copyListSelect");
+ if(!src)return;
+ const wrap=document.getElementById("editItems");
+ if(wrap.querySelector(".edit-row")&&!confirm(`「${src.name||"無題"}」の内容で現在の項目を置き換えますか？（保存するまで確定しません）`)){sel.value="";return}
+ wrap.innerHTML="";
+ src.items.forEach(it=>{if(it.type==="heading")addEditHeading({text:it.text});else addEditItem({text:it.text,points:it.points,checked:false})});
+ document.getElementById("thresholdInput").value=src.threshold;
+ sel.value="";toggleCopySelect(false)
 }
 function attachDrag(row,wrap){
  row.draggable=true;
