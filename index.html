@@ -282,11 +282,13 @@ function copyResult(){
  const realItems=data.items.filter(x=>x.type!=="heading");
  const score=realItems.reduce((s,x)=>s+(x.checked?Number(x.points):0),0);
  const max=realItems.reduce((s,x)=>s+Number(x.points),0);
- const lines=[`${score}/${max}点`];
+ const threshold=Math.max(0,Number(data.threshold)||0);
+ const mark=score>=threshold?"⭕️":"❌";
+ const lines=[`${mark} ${score}/${max}点`];
  let currentHeading=null,bucket=[];
  const flush=()=>{
   if(bucket.length){
-   lines.push((currentHeading!==null?currentHeading+"―":"")+bucket.join("、"));
+   lines.push("\u3000 "+(currentHeading!==null?currentHeading+"―":"")+bucket.join("、"));
   }
   bucket=[]
  };
