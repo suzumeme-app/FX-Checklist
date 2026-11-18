@@ -48,6 +48,8 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .th-row{display:flex;align-items:center;gap:12px}.th-row input{flex:1;min-width:0}.th-count{white-space:nowrap;font-size:14px;font-weight:700;color:var(--muted)}
 .edit-row.lifted{position:relative;z-index:5;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.35);border-radius:10px}
 .edit-row.shifting{transition:transform .15s}
+.badge-req{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:99px;background:var(--list-accent);color:#fff;font-size:11px;font-weight:800;letter-spacing:0;vertical-align:1px}
+.req-label{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;flex:0 0 auto}.req-label input{width:18px;height:18px;accent-color:var(--list-accent);margin:0}
 </style>
 </head>
 <body>
@@ -155,21 +157,29 @@ function toggleTheme(){
  closeMenu()
 }
 applyTheme(localStorage.getItem(THEME_KEY)==="dark"?"dark":"light");
+function requiredOk(){
+ let req=false;
+ for(const it of data.items){
+  if(it.type==="heading"){req=!!it.required;continue}
+  if(req&&!it.checked)return false
+ }
+ return true
+}
 function render(){
  renderTabs();
  document.documentElement.style.setProperty("--list-accent",data.color||getComputedStyle(document.documentElement).getPropertyValue("--accent"));
  const box=document.getElementById("items");box.innerHTML="";
  data.items.forEach((it,i)=>{
   if(it.type==="heading"){
-   const h=document.createElement("div");h.className="heading";h.textContent=it.text;box.appendChild(h);return
+   const h=document.createElement("div");h.className="heading";h.textContent=it.text;if(it.required){const b=document.createElement("span");b.className="badge-req";b.textContent="必須";h.appendChild(b)}box.appendChild(h);return
   }
-  const row=document.createElement("label");row.className="item";row.innerHTML=`<input class="check" type="checkbox" ${it.checked?"checked":""} onchange="toggle(${i})"><div class="label"><div class="label-text"></div></div><div class="points">＋${it.points}点</div>`;row.querySelector(".label-text").textContent=it.text;box.appendChild(row)
+  const row=document.createElement("label");row.className="item";row.innerHTML=`<input class="check" type="checkbox" ${it.checked?"checked":""} onchange="toggle(${i})"><div class="label"><div class="label-text"></div></div>`;row.querySelector(".label-text").textContent=it.text;box.appendChild(row)
  });
  const realItems=data.items.filter(x=>x.type!=="heading");
  document.getElementById("count").textContent=realItems.length+"項目";
  const score=realItems.reduce((s,x)=>s+(x.checked?Number(x.points):0),0),max=realItems.reduce((s,x)=>s+Number(x.points),0),threshold=Math.max(0,Number(data.threshold)||0);
  document.getElementById("score").textContent=score;document.getElementById("max").textContent=max;document.getElementById("threshold").textContent=threshold;document.getElementById("remaining").textContent=Math.max(0,threshold-score);
- const ok=score>=threshold;const st=document.getElementById("status");st.textContent=ok?"達成":"未達成";st.className="status "+(ok?"good":"bad");const barEl=document.getElementById("bar");barEl.style.width=(max?Math.min(100,score/max*100):0)+"%";barEl.style.background=ok?"var(--good)":"var(--bad)";
+ const ok=score>=threshold&&requiredOk();const st=document.getElementById("status");st.textContent=ok?"達成":"未達成";st.className="status "+(ok?"good":"bad");const barEl=document.getElementById("bar");barEl.style.width=(max?Math.min(100,score/max*100):0)+"%";barEl.style.background=ok?"var(--good)":"var(--bad)";
 }
 function toggle(i){data.items[i].checked=!data.items[i].checked;save();render()}
 function renderTabs(){
@@ -283,7 +293,7 @@ function copyResult(){
  const score=realItems.reduce((s,x)=>s+(x.checked?Number(x.points):0),0);
  const max=realItems.reduce((s,x)=>s+Number(x.points),0);
  const threshold=Math.max(0,Number(data.threshold)||0);
- const mark=score>=threshold?"⭕️":"❌";
+ const mark=(score>=threshold&&requiredOk())?"⭕️":"❌";
  const lines=[`${mark} ${score}/${max}点`];
  let currentHeading=null,bucket=[];
  const flush=()=>{
@@ -367,7 +377,7 @@ function copyFromList(id){
  const wrap=document.getElementById("editItems");
  if(wrap.querySelector(".edit-row")&&!confirm(`「${src.name||"無題"}」の内容で現在の項目を置き換えますか？（保存するまで確定しません）`)){sel.value="";return}
  wrap.innerHTML="";
- src.items.forEach(it=>{if(it.type==="heading")addEditHeading({text:it.text});else addEditItem({text:it.text,points:it.points,checked:false})});
+ src.items.forEach(it=>{if(it.type==="heading")addEditHeading({text:it.text,required:it.required});else addEditItem({text:it.text,points:it.points,checked:false})});
  document.getElementById("thresholdInput").value=src.threshold;
  renderColorPalette(src.color||TAB_COLORS[0]);
  sel.value="";toggleCopySelect(false)
@@ -433,8 +443,8 @@ function addEditItem(it={text:"新しい条件",points:1,checked:false}){
 }
 function addEditHeading(it={text:"新しいジャンル"}){
  const wrap=document.getElementById("editItems"),row=document.createElement("div");row.className="edit-row heading-row";row.dataset.kind="heading";
- row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text" placeholder="ジャンル名"><button class="icon" type="button">削除</button>`;
- row.querySelector(".etext").value=it.text;
+ row.innerHTML=`<span class="drag-handle">⠿</span><input class="etext" type="text" placeholder="ジャンル名"><label class="req-label"><input class="ereq" type="checkbox">必須</label><button class="icon" type="button">削除</button>`;
+ row.querySelector(".etext").value=it.text;row.querySelector(".ereq").checked=!!it.required;
  row.querySelector("button").onclick=()=>row.remove();
  attachDrag(row,wrap);wrap.appendChild(row)
 }
@@ -444,7 +454,7 @@ function saveSettings(){
  const rows=[...document.querySelectorAll(".edit-row")],items=[];
  rows.forEach((r)=>{
   const text=r.querySelector(".etext").value.trim();if(!text)return;
-  if(r.dataset.kind==="heading"){items.push({type:"heading",text});return}
+  if(r.dataset.kind==="heading"){const h={type:"heading",text};if(r.querySelector(".ereq").checked)h.required=true;items.push(h);return}
   items.push({text,points:1,checked:false})
  });
  const old=data.items.filter(x=>x.type!=="heading");
