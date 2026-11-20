@@ -25,7 +25,7 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
 .actions{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--line)}.actions button{display:flex;align-items:center;gap:8px;transition:background .2s}
 #copyBtn.copied{background:var(--good)}
 #copyBtn{width:150px;justify-content:center;flex:0 0 auto;background:var(--list-accent)}
-.menu-wrap{position:relative}.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:170px;padding:6px;display:none;z-index:20}.menu.open{display:block}.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;padding:10px 12px;border-radius:8px;font-size:14px;color:var(--text)}.menu button:hover{background:var(--hover-bg)}.menu-icon{width:18px;height:18px;flex:0 0 auto;color:currentColor}
+.menu-wrap{position:relative}.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:170px;padding:6px;display:none;z-index:20}.menu.open{display:block}.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;padding:10px 12px;border-radius:8px;font-size:14px;color:var(--text)}.menu button:hover{background:var(--hover-bg)}.menu-icon{width:18px;height:18px;flex:0 0 auto;color:currentColor}.top .icon-btn{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:12px;background:var(--secondary-bg);color:var(--text)}.top .icon-btn:hover{background:var(--hover-bg)}.top .icon-btn svg{width:20px;height:20px}.menu{width:min(330px,calc(100vw - 36px));padding:18px;border-radius:15px}.menu h3{margin:0 0 14px;font-size:16px}.menu-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:11px 6px;border-top:1px solid var(--line);font-size:14px}.menu button.menu-row{padding:11px 6px;border-radius:0;border-top:1px solid var(--line)}.menu-label{display:flex;align-items:center;gap:10px}.menu .menu-icon{color:var(--accent)}.switch{width:42px;height:24px;border-radius:20px;background:var(--input-border);position:relative;cursor:pointer;flex:none;transition:background .2s}.switch:after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}.switch.on{background:var(--accent)}.switch.on:after{left:21px}
 .modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-bg.open{display:flex}.modal{background:var(--card);width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:20px;box-shadow:var(--modal-shadow);color:var(--text)}.modal h2{margin:0 0 16px;font-size:19px}.field{margin-bottom:14px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field input[type=text],.field input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--input-border);border-radius:10px;outline:none;background:var(--card);color:var(--text)}.edit-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;background:var(--card)}.edit-row input[type=text]{flex:1}.edit-row input[type=number]{width:56px;padding-left:8px;padding-right:4px}.icon{background:var(--secondary-bg);color:var(--secondary-text);padding:9px 11px}.drag-handle{cursor:grab;color:var(--muted);font-size:16px;padding:9px 8px;flex:0 0 auto;touch-action:none;user-select:none}.edit-row.dragging{opacity:.4}.edit-row.drag-over-top{border-top:2px solid var(--accent)}.edit-row.drag-over-bottom{border-bottom:2px solid var(--accent)}.edit-row.heading-row{background:var(--secondary-bg);border-radius:10px;padding:4px 6px}.edit-row.heading-row .etext{font-weight:800}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
 @media(max-width:560px){.app{padding:18px 12px 35px}.top{align-items:flex-start}.top button{padding:8px 10px}.score{font-size:34px}.item{gap:10px}.label-text{font-size:14px}}
 .tabbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
@@ -57,12 +57,13 @@ button,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;c
   <div class="top">
     <div><div class="title">FX Checklist</div></div>
     <div class="menu-wrap">
-      <button class="secondary" onclick="toggleMenu()" style="display:flex;align-items:center;gap:8px"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</button>
+      <button class="icon-btn" onclick="toggleMenu()" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       <div id="settingsMenu" class="menu">
-        <button onclick="openSettings()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z"/><path d="M13 7l4 4"/></svg>項目を編集</button>
-        <button onclick="downloadDataMenu()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 8l4-4 4 4"/><rect x="5" y="15" width="14" height="5" rx="2"/></svg>保存</button>
-        <button onclick="triggerImport()"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><rect x="5" y="15" width="14" height="5" rx="2"/></svg>インポート</button>
-        <button onclick="toggleTheme()"><svg id="themeIcon" class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg><span id="themeLabel">ダークモード</span></button>
+        <h3>設定</h3>
+        <div class="menu-row"><span class="menu-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>ダークモード</span><div class="switch" id="themeSwitch" role="switch" aria-checked="false" aria-label="ダークモード" tabindex="0" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme()}"></div></div>
+        <button class="menu-row" onclick="openSettings()"><span class="menu-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z"/><path d="M13 7l4 4"/></svg>項目を編集</span></button>
+        <button class="menu-row" onclick="downloadDataMenu()"><span class="menu-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>保存</span></button>
+        <button class="menu-row" onclick="triggerImport()"><span class="menu-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 19h14"/></svg>インポート</span></button>
       </div>
     </div>
     <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importData(event)">
@@ -146,15 +147,14 @@ const moonIcon='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
 const sunIcon='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
 function applyTheme(theme){
  document.documentElement.setAttribute("data-theme",theme);
- document.getElementById("themeIcon").innerHTML=theme==="dark"?sunIcon:moonIcon;
- document.getElementById("themeLabel").textContent=theme==="dark"?"ライトモード":"ダークモード";
+ const sw=document.getElementById("themeSwitch");sw.classList.toggle("on",theme==="dark");sw.setAttribute("aria-checked",theme==="dark"?"true":"false");
 }
 function toggleTheme(){
  const current=document.documentElement.getAttribute("data-theme")==="dark"?"dark":"light";
  const next=current==="dark"?"light":"dark";
  localStorage.setItem(THEME_KEY,next);
  applyTheme(next);
- closeMenu()
+ applyListColor()
 }
 applyTheme(localStorage.getItem(THEME_KEY)==="dark"?"dark":"light");
 function requiredOk(){
@@ -165,9 +165,17 @@ function requiredOk(){
  }
  return true
 }
+function applyListColor(){
+ const root=document.documentElement;
+ root.style.removeProperty("--accent");
+ const base=getComputedStyle(root).getPropertyValue("--accent").trim();
+ const c=(typeof data!=="undefined"&&data&&data.color)||base;
+ root.style.setProperty("--list-accent",c);
+ root.style.setProperty("--accent",c)
+}
 function render(){
  renderTabs();
- document.documentElement.style.setProperty("--list-accent",data.color||getComputedStyle(document.documentElement).getPropertyValue("--accent"));
+ applyListColor();
  const box=document.getElementById("items");box.innerHTML="";
  data.items.forEach((it,i)=>{
   if(it.type==="heading"){
@@ -491,7 +499,8 @@ function downloadData(scope){
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
  const d=new Date();
- const ts=`${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,"0")}分`;
+ const z=n=>String(n).padStart(2,"0");
+ const ts=`${d.getFullYear()}.${z(d.getMonth()+1)}.${z(d.getDate())}_${d.getHours()}：${z(d.getMinutes())}`;
  const namePart=scope==="current"?(data.name||"無題").replace(/[\\/:*?"<>|]/g,""):"すべて";
  a.href=url;a.download=`FXチェックリスト(${namePart}) ${ts}.json`;
  document.body.appendChild(a);a.click();a.remove();
